@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with vehicle registration and simulated digital wallet balance.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The user's authentication UID." },
+        "email": { "type": "string", "description": "User email address." },
+        "displayName": { "type": "string", "description": "User display name." },
+        "vehicleNumber": { "type": "string", "description": "Default vehicle registration number in standard Indian format." },
+        "walletBalance": { "type": "number", "description": "Current balance in digital toll wallet." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via server timestamp." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp via server timestamp." }
+      },
+      "required": ["userId", "email", "displayName", "walletBalance", "createdAt"]
+    },
+    "Journey": {
+      "title": "Journey",
+      "description": "Active or completed highway journey record.",
+      "type": "object",
+      "properties": {
+        "journeyId": { "type": "string", "description": "Formatted unique ID, e.g., JRN-20261015-A7F42." },
+        "userId": { "type": "string", "description": "UID of the owner traveler." },
+        "vehicleNumber": { "type": "string", "description": "Vehicle registration number used for this journey." },
+        "startLocation": { "type": "string", "description": "Origin city or highway point." },
+        "startLatitude": { "type": "number", "description": "Latitude coordinate of origin." },
+        "startLongitude": { "type": "number", "description": "Longitude coordinate of origin." },
+        "destination": { "type": "string", "description": "Destination city or highway point." },
+        "destLatitude": { "type": "number", "description": "Latitude coordinate of destination." },
+        "destLongitude": { "type": "number", "description": "Longitude coordinate of destination." },
+        "status": { "type": "string", "enum": ["ACTIVE", "COMPLETED", "CANCELLED"], "description": "Current lifecycle status." },
+        "startTime": { "type": "string", "format": "date-time", "description": "Journey start timestamp." },
+        "endTime": { "type": "string", "format": "date-time", "description": "Journey completion timestamp." },
+        "totalTollsDeducted": { "type": "number", "description": "Total simulated toll deductions during journey." },
+        "tollsPassedCount": { "type": "number", "description": "Number of tolls crossed." },
+        "totalDistanceKm": { "type": "number", "description": "Estimated total highway distance in kilometers." },
+        "servicesUsedCount": { "type": "number", "description": "Count of highway services availed." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp." }
+      },
+      "required": ["journeyId", "userId", "vehicleNumber", "startLocation", "destination", "status", "createdAt"]
+    },
+    "TollPlaza": {
+      "title": "TollPlaza",
+      "description": "Highway toll plaza information with coordinates and amenities.",
+      "type": "object",
+      "properties": {
+        "tollId": { "type": "string", "description": "Unique toll plaza code or ID." },
+        "name": { "type": "string", "description": "Name of the toll plaza." },
+        "highway": { "type": "string", "description": "National highway or expressway name." },
+        "latitude": { "type": "number", "description": "GPS latitude." },
+        "longitude": { "type": "number", "description": "GPS longitude." },
+        "standardRate": { "type": "number", "description": "Standard toll rate for cars/jeeps." },
+        "commercialRate": { "type": "number", "description": "Commercial vehicle toll rate." },
+        "availableLanes": { "type": "number", "description": "Number of operational lanes." },
+        "emergencyContact": { "type": "string", "description": "NHAI or local toll emergency helpline." },
+        "facilities": { "type": "array", "description": "List of available plaza facilities." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Record creation timestamp." }
+      },
+      "required": ["tollId", "name", "highway", "latitude", "longitude", "standardRate"]
+    },
+    "ServiceRequest": {
+      "title": "ServiceRequest",
+      "description": "Traveler service or assistance request along the highway route.",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "description": "Unique request identifier." },
+        "journeyId": { "type": "string", "description": "Associated Journey ID." },
+        "userId": { "type": "string", "description": "UID of the requester." },
+        "tollId": { "type": "string", "description": "Associated Toll Plaza or location code." },
+        "serviceCategory": { "type": "string", "description": "Category: FUEL, EV_CHARGING, REPAIR, TYRE_PUNCTURE, ROADSIDE_ASSISTANCE, MEDICAL, FOOD, RESTROOM, WATER, PARKING." },
+        "serviceName": { "type": "string", "description": "Title of the requested service." },
+        "vehicleNumber": { "type": "string", "description": "Vehicle number needing service." },
+        "notes": { "type": "string", "description": "Specific traveler notes or location hints." },
+        "status": { "type": "string", "enum": ["REQUESTED", "CONFIRMED", "COMPLETED", "CANCELLED"], "description": "Status of the request." },
+        "estimatedCharge": { "type": "number", "description": "Estimated service fee if applicable." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Request creation timestamp." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp." }
+      },
+      "required": ["requestId", "journeyId", "userId", "serviceCategory", "serviceName", "status", "createdAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "In-app digital toll wallet transaction record.",
+      "type": "object",
+      "properties": {
+        "transactionId": { "type": "string", "description": "Unique transaction ID." },
+        "userId": { "type": "string", "description": "Owner UID." },
+        "journeyId": { "type": "string", "description": "Associated journey ID if toll deduction." },
+        "type": { "type": "string", "enum": ["WALLET_TOPUP", "TOLL_DEDUCTION", "SERVICE_PAYMENT"], "description": "Transaction category." },
+        "amount": { "type": "number", "description": "Amount in rupees." },
+        "title": { "type": "string", "description": "Brief transaction description." },
+        "description": { "type": "string", "description": "Detailed explanation." },
+        "disclaimer": { "type": "string", "description": "Simulated toll notice disclaimer." },
+        "status": { "type": "string", "enum": ["SUCCESS", "PENDING", "FAILED"], "description": "Payment status." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of transaction." }
+      },
+      "required": ["transactionId", "userId", "type", "amount", "title", "status", "createdAt"]
+    },
+    "EmergencyRequest": {
+      "title": "EmergencyRequest",
+      "description": "Highway SOS or emergency assistance call record.",
+      "type": "object",
+      "properties": {
+        "emergencyId": { "type": "string", "description": "Unique emergency ticket ID." },
+        "journeyId": { "type": "string", "description": "Active Journey ID." },
+        "userId": { "type": "string", "description": "Owner user UID." },
+        "vehicleNumber": { "type": "string", "description": "Vehicle registration number." },
+        "latitude": { "type": "number", "description": "Current GPS latitude." },
+        "longitude": { "type": "number", "description": "Current GPS longitude." },
+        "locationDescription": { "type": "string", "description": "Nearby landmark or highway KM stone." },
+        "emergencyType": { "type": "string", "enum": ["ACCIDENT", "BREAKDOWN", "MEDICAL", "CRIME_SAFETY", "OTHER"], "description": "Type of emergency." },
+        "status": { "type": "string", "enum": ["REPORTED", "DISPATCHED", "RESOLVED"], "description": "Resolution status." },
+        "notes": { "type": "string", "description": "Details for rescue / patrol team." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Status update timestamp." }
+      },
+      "required": ["emergencyId", "journeyId", "userId", "vehicleNumber", "emergencyType", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile, vehicle details, and digital wallet."
+    },
+    "/journeys/{journeyId}": {
+      "schema": { "$ref": "#/entities/Journey" },
+      "description": "Highway journeys created and tracked by users."
+    },
+    "/tolls/{tollId}": {
+      "schema": { "$ref": "#/entities/TollPlaza" },
+      "description": "Catalog of highway toll plazas and facilities."
+    },
+    "/service_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/ServiceRequest" },
+      "description": "Traveler service requests along highway toll plazas."
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Simulated toll wallet balance recharges and toll payment receipts."
+    },
+    "/emergency_requests/{emergencyId}": {
+      "schema": { "$ref": "#/entities/EmergencyRequest" },
+      "description": "Highway emergency assistance / SOS requests."
+    }
+  }
+}

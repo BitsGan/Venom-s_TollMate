@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TollMate</string>
+    <string name="tagline">Smart Highway Journey &amp; Live Toll Companion</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="start_journey">LET\'S START</string>
+    <string name="live_toll_detection">Live Toll Detection</string>
+    <string name="digital_wallet">Digital Wallet</string>
+    <string name="profile">Profile</string>
+    <string name="ai_assistant">AI Travel Assistant</string>
+    <string name="emergency_sos">Emergency SOS</string>
+    <string name="wallet_disclaimer">Notice: Recorded deductions are for in-app tracking and estimation only. Not an official FASTag or NHAI toll transaction.</string>
+</resources>

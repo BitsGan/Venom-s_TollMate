@@ -1,0 +1,6 @@
+{
+  "name": "TollMate",
+  "description": "Smart highway journey management, live toll tracking, digital wallet, roadside facilities, and travel assistance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,192 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ganeshadigoppula30@gmail.com' ||
+        (request.auth.token.keys().hasAll(['admin']) && request.auth.token.admin == true)
+      );
+    }
+
+    function isValidUserProfile(data) {
+      return (!('userId' in data) || (data.userId is string && data.userId.size() <= 128)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 150)) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
+             (!('vehicleNumber' in data) || (data.vehicleNumber is string && data.vehicleNumber.size() <= 30)) &&
+             (!('vehicle_number' in data) || (data.vehicle_number is string && data.vehicle_number.size() <= 30)) &&
+             (!('phonePeNumber' in data) || (data.phonePeNumber is string && data.phonePeNumber.size() <= 50)) &&
+             (!('mobileNumber' in data) || (data.mobileNumber is string && data.mobileNumber.size() <= 30)) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 30)) &&
+             (!('upiId' in data) || (data.upiId is string && data.upiId.size() <= 80)) &&
+             (!('walletBalance' in data) || data.walletBalance is number) &&
+             (!('balance' in data) || data.balance is number);
+    }
+
+    function isValidJourney(data) {
+      return data.journeyId is string && data.journeyId.size() > 0 && data.journeyId.size() <= 64 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.vehicleNumber is string && data.vehicleNumber.size() > 0 && data.vehicleNumber.size() <= 30 &&
+             data.startLocation is string && data.startLocation.size() > 0 && data.startLocation.size() <= 150 &&
+             data.destination is string && data.destination.size() > 0 && data.destination.size() <= 150 &&
+             data.status in ['ACTIVE', 'COMPLETED', 'CANCELLED'] &&
+             (!('startLatitude' in data) || data.startLatitude is number) &&
+             (!('startLongitude' in data) || data.startLongitude is number) &&
+             (!('destLatitude' in data) || data.destLatitude is number) &&
+             (!('destLongitude' in data) || data.destLongitude is number) &&
+             (!('totalTollsDeducted' in data) || data.totalTollsDeducted is number) &&
+             (!('tollsPassedCount' in data) || data.tollsPassedCount is number) &&
+             (!('totalDistanceKm' in data) || data.totalDistanceKm is number) &&
+             (!('servicesUsedCount' in data) || data.servicesUsedCount is number) &&
+             (!('endTime' in data) || data.endTime is timestamp);
+    }
+
+    function isValidTollPlaza(data) {
+      return data.tollId is string && data.tollId.size() > 0 && data.tollId.size() <= 64 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 150 &&
+             data.highway is string && data.highway.size() > 0 && data.highway.size() <= 64 &&
+             data.latitude is number &&
+             data.longitude is number &&
+             data.standardRate is number && data.standardRate >= 0 &&
+             (!('commercialRate' in data) || data.commercialRate is number) &&
+             (!('availableLanes' in data) || data.availableLanes is int) &&
+             (!('emergencyContact' in data) || (data.emergencyContact is string && data.emergencyContact.size() <= 30)) &&
+             (!('facilities' in data) || (data.facilities is list && data.facilities.size() <= 20));
+    }
+
+    function isValidServiceRequest(data) {
+      return data.requestId is string && data.requestId.size() > 0 && data.requestId.size() <= 64 &&
+             data.journeyId is string && data.journeyId.size() > 0 && data.journeyId.size() <= 64 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.serviceCategory in ['FUEL', 'EV_CHARGING', 'REPAIR', 'TYRE_PUNCTURE', 'ROADSIDE_ASSISTANCE', 'MEDICAL', 'FOOD', 'RESTROOM', 'WATER', 'PARKING'] &&
+             data.serviceName is string && data.serviceName.size() > 0 && data.serviceName.size() <= 100 &&
+             data.status in ['REQUESTED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] &&
+             (!('vehicleNumber' in data) || (data.vehicleNumber is string && data.vehicleNumber.size() <= 30)) &&
+             (!('tollId' in data) || (data.tollId is string && data.tollId.size() <= 64)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 500)) &&
+             (!('estimatedCharge' in data) || data.estimatedCharge is number);
+    }
+
+    function isValidTransaction(data) {
+      return data.transactionId is string && data.transactionId.size() > 0 && data.transactionId.size() <= 64 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.type in ['WALLET_TOPUP', 'TOLL_DEDUCTION', 'SERVICE_PAYMENT', 'UPI_TRANSFER', 'PHONEPE_TRANSFER'] &&
+             data.amount is number &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 120 &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 30)) &&
+             (!('journeyId' in data) || (data.journeyId is string && data.journeyId.size() <= 64)) &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 500)) &&
+             (!('disclaimer' in data) || (data.disclaimer is string && data.disclaimer.size() <= 300)) &&
+             (!('phonePeNumber' in data) || (data.phonePeNumber is string && data.phonePeNumber.size() <= 50)) &&
+             (!('upiId' in data) || (data.upiId is string && data.upiId.size() <= 80)) &&
+             (!('recipient' in data) || (data.recipient is string && data.recipient.size() <= 100));
+    }
+
+    function isValidEmergencyRequest(data) {
+      return data.emergencyId is string && data.emergencyId.size() > 0 && data.emergencyId.size() <= 64 &&
+             data.journeyId is string && data.journeyId.size() > 0 && data.journeyId.size() <= 64 &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128 &&
+             data.vehicleNumber is string && data.vehicleNumber.size() > 0 && data.vehicleNumber.size() <= 30 &&
+             data.emergencyType in ['ACCIDENT', 'BREAKDOWN', 'MEDICAL', 'CRIME_SAFETY', 'OTHER'] &&
+             data.status in ['REPORTED', 'DISPATCHED', 'RESOLVED'] &&
+             (!('locationDescription' in data) || (data.locationDescription is string && data.locationDescription.size() <= 250)) &&
+             (!('latitude' in data) || data.latitude is number) &&
+             (!('longitude' in data) || data.longitude is number) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 500));
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       (request.auth.uid == userId || isAdmin()) &&
+                       isValidUserProfile(incoming());
+      allow update: if isSignedIn() &&
+                       (request.auth.uid == userId || isAdmin()) &&
+                       isValidUserProfile(incoming());
+      allow delete: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Journeys collection
+    match /journeys/{journeyId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       isValidId(journeyId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidJourney(incoming());
+      allow update: if isSignedIn() &&
+                       (resource.data.userId == request.auth.uid || isAdmin()) &&
+                       isValidJourney(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Toll plazas collection (Public read for signed in users)
+    match /tolls/{tollId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isAdmin() && isValidTollPlaza(incoming());
+    }
+
+    // Service requests collection
+    match /service_requests/{requestId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       isValidId(requestId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidServiceRequest(incoming());
+      allow update: if isSignedIn() &&
+                       (resource.data.userId == request.auth.uid || isAdmin()) &&
+                       isValidServiceRequest(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Transactions collection (Deductions, Topups, PhonePe Transfers)
+    match /transactions/{transactionId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       isValidId(transactionId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidTransaction(incoming());
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Emergency requests collection
+    match /emergency_requests/{emergencyId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       isValidId(emergencyId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidEmergencyRequest(incoming());
+      allow update: if isSignedIn() &&
+                       (resource.data.userId == request.auth.uid || isAdmin()) &&
+                       isValidEmergencyRequest(incoming());
+      allow delete: if isAdmin();
+    }
+  }
+}
